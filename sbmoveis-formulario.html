@@ -270,8 +270,10 @@
     <div class="field">
       <label>Frete</label>
       <div class="pfx"><span>R$</span><input type="number" id="frete" placeholder="0,00" step="0.01" min="0" value="0" oninput="calcTotal()"/></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer" onclick="document.getElementById('freteRetirada').click()">
-        <input type="checkbox" id="freteRetirada" onchange="toggleFreteRetirada()" onclick="event.stopPropagation()" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0"/>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px;cursor:pointer" onclick="toggleFreteRetirada()">
+        <div id="freteRetiradaBox" style="width:20px;height:20px;border:2px solid var(--blue);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;background:transparent">
+          <span id="freteRetiradaTick" style="color:var(--blue);font-size:14px;display:none">✓</span>
+        </div>
         <span style="font-size:13px;color:var(--blue);font-weight:500">🏪 Cliente vai retirar — sem frete</span>
       </div>
     </div>
@@ -590,16 +592,20 @@ function getItens(){
   return items;
 }
 
+let freteRetiradaAtivo = false;
 function toggleFreteRetirada(){
-  const checked = document.getElementById('freteRetirada').checked;
+  freteRetiradaAtivo = !freteRetiradaAtivo;
   const freteEl = document.getElementById('frete');
-  if(checked){
-    freteEl.value = '0';
-    freteEl.disabled = true;
-    freteEl.style.opacity = '0.4';
+  const box = document.getElementById('freteRetiradaBox');
+  const tick = document.getElementById('freteRetiradaTick');
+  if(freteRetiradaAtivo){
+    freteEl.value='0'; freteEl.disabled=true; freteEl.style.opacity='0.4';
+    box.style.background='var(--blue)'; box.style.borderColor='var(--blue)';
+    tick.style.display='block';
   } else {
-    freteEl.disabled = false;
-    freteEl.style.opacity = '1';
+    freteEl.disabled=false; freteEl.style.opacity='1';
+    box.style.background='transparent'; box.style.borderColor='var(--blue)';
+    tick.style.display='none';
   }
   calcTotal();
 }
