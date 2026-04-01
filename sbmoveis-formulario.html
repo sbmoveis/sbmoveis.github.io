@@ -270,10 +270,10 @@
     <div class="field">
       <label>Frete</label>
       <div class="pfx"><span>R$</span><input type="number" id="frete" placeholder="0,00" step="0.01" min="0" value="0" oninput="calcTotal()"/></div>
-      <label style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer;font-size:13px;color:var(--blue);font-weight:500;letter-spacing:0;text-transform:none">
-        <input type="checkbox" id="freteRetirada" onchange="toggleFreteRetirada()" style="width:15px;height:15px;accent-color:var(--blue);cursor:pointer"/>
-        🏪 Cliente vai retirar — sem frete
-      </label>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer" onclick="document.getElementById('freteRetirada').click()">
+        <input type="checkbox" id="freteRetirada" onchange="toggleFreteRetirada()" onclick="event.stopPropagation()" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0"/>
+        <span style="font-size:13px;color:var(--blue);font-weight:500">🏪 Cliente vai retirar — sem frete</span>
+      </div>
     </div>
 
     <!-- ── PAYMENT TYPE ── -->
