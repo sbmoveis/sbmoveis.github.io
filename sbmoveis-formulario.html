@@ -829,6 +829,11 @@ function finishStep1(){
 
 // ── Step 2 ──
 function finishStep2(){
+  // Verifica se os dados do vendedor foram carregados
+  if(!S.vendedor || !S.itens || S.itens.length === 0){
+    alert('Os dados do pedido ainda estão carregando. Aguarde um momento e tente novamente.');
+    return;
+  }
   if(!validate([['f-nome','nome'],['f-cpfcnpj','cpfcnpj'],['f-telefone','telefone'],['f-cep','cep'],['f-endereco','endereco'],['f-numero','numero'],['f-bairro','bairro'],['f-cidade','cidade'],['f-estado','estado']]))return;
   S.nome=document.getElementById('nome').value.trim();
   S.cpfcnpj=document.getElementById('cpfcnpj').value.trim();
