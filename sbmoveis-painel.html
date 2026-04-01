@@ -699,27 +699,100 @@ function openDetail(id){
     }
   }
 
+  const isVendedor = !isAdmin && !isFinanceiro;
+  const inp = (id,val,ph='')=>`<input type="text" id="${id}" value="${(val||'').replace(/"/g,'&quot;')}" placeholder="${ph}" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"/>`;
+  const inpN = (id,val,ph='')=>`<input type="number" id="${id}" value="${val||''}" placeholder="${ph}" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"/>`;
+
+  // Itens do pedido editáveis
+  const itens = p.itens||[];
+  const itensEditHtml = itens.length>0 ? itens.map((it,i)=>`
+    <div style="background:#0d0d0d;border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:10px">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:10px">PRODUTO ${i+1}</div>
+      <div class="modal-row">
+        <div class="f"><label>Modelo</label>${inp(`e-modelo-${i}`,it.modelo)}</div>
+        <div class="f"><label>Cor</label>${inp(`e-cor-${i}`,it.cor)}</div>
+      </div>
+      <div class="modal-row">
+        <div class="f"><label>Quantidade</label>${inpN(`e-qtd-${i}`,it.qtd)}</div>
+        <div class="f"><label>Valor Unit. (R$)</label>${inpN(`e-valor-${i}`,it.valor,'0,00')}</div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green);cursor:pointer;margin-top:8px">
+        <input type="checkbox" id="e-brinde-${i}" ${it.brinde?'checked':''} onchange="toggleBrindeEdit(${i})" style="width:15px;height:15px;accent-color:var(--green)"/>
+        🎁 Brinde
+      </label>
+    </div>`).join('')
+  : `<div style="background:#0d0d0d;border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:10px">
+      <div class="modal-row">
+        <div class="f"><label>Modelo</label>${inp('e-modelo-old',p.modelo)}</div>
+        <div class="f"><label>Cor</label>${inp('e-cor-old',p.cor)}</div>
+      </div>
+      <div class="modal-row">
+        <div class="f"><label>Quantidade</label>${inpN('e-qtd-old',p.quantidade||1)}</div>
+        <div class="f"><label>Valor (R$)</label>${inpN('e-valor-old',p.valorMercadoria,'0,00')}</div>
+      </div>
+    </div>`;
+
   document.getElementById('modalTitle').textContent='PEDIDO '+p.id;
   document.getElementById('modalBody').innerHTML=`
-    <div class="det-grid">
-      <div class="det-item"><label>Vendedor</label><p style="color:${vc}">${p.vendedor}</p></div>
-      <div class="det-item"><label>Data</label><p>${fmtDate(p.data)}</p></div>
-      <div class="det-item"><label>Cliente</label><p>${p.nome}</p></div>
-      <div class="det-item"><label>Telefone</label><p>${p.telefone}</p></div>
-      <div class="det-item"><label>CPF/CNPJ</label><p>${p.cpfcnpj}</p></div>
-      <div class="det-item"><label>Modelo</label><p>${p.modelo} — ${p.cor||'–'}</p></div>
-      <div class="det-item" style="grid-column:1/-1"><label>Endereço</label><p>${p.endereco}, ${p.bairro} – ${p.cidade}/${p.estado} – CEP ${p.cep}</p></div>
-      <div class="det-item"><label>Mercadoria</label><p style="color:var(--gold)">${fmtBRL(p.valorMercadoria)}</p></div>
-      <div class="det-item"><label>Frete</label><p>${fmtBRL(p.frete)}</p></div>
-      <div class="det-item"><label>Total</label><p style="color:var(--gold);font-size:16px;font-weight:700">${fmtBRL(total)}</p></div>
-      <div class="det-item"><label>Pagamento</label><p>${p.pagamento}</p></div>
+
+    <div class="modal-section">
+      <h4>◆ DADOS DO CLIENTE</h4>
+      <div class="modal-row">
+        <div class="f"><label>Nome</label>${inp('e-nome',p.nome)}</div>
+        <div class="f"><label>Telefone</label>${inp('e-telefone',p.telefone)}</div>
+      </div>
+      <div class="modal-row">
+        <div class="f"><label>CPF/CNPJ</label>${inp('e-cpfcnpj',p.cpfcnpj)}</div>
+        <div class="f"><label>E-mail</label>${inp('e-email',p.email)}</div>
+      </div>
     </div>
 
     <div class="modal-section">
-      <h4>◆ SITUAÇÃO DO PAGAMENTO</h4>
-      ${paySection}
+      <h4>◆ ENDEREÇO DE ENTREGA</h4>
+      <div class="modal-row">
+        <div class="f" style="flex:2"><label>Endereço</label>${inp('e-endereco',p.endereco)}</div>
+        <div class="f"><label>Bairro</label>${inp('e-bairro',p.bairro)}</div>
+      </div>
+      <div class="modal-row">
+        <div class="f"><label>Cidade</label>${inp('e-cidade',p.cidade)}</div>
+        <div class="f"><label>Estado</label>${inp('e-estado',p.estado)}</div>
+        <div class="f"><label>CEP</label>${inp('e-cep',p.cep)}</div>
+      </div>
     </div>
 
+    <div class="modal-section">
+      <h4>◆ PRODUTOS</h4>
+      ${itensEditHtml}
+      <div class="modal-row" style="margin-top:8px">
+        <div class="f"><label>Frete (R$)</label>${inpN('e-frete',p.frete,'0,00')}</div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h4>◆ PAGAMENTO</h4>
+      <div class="modal-row">
+        <div class="f"><label>Forma de Pagamento</label>${inp('e-pagamento',p.pagamento,'Ex: PIX, Cartão 3x…')}</div>
+        <div class="f"><label>Situação</label>
+          <select id="e-tipoPag" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;">
+            <option value="pago" ${p.tipoPagamento==='pago'?'selected':''}>✅ Pago integral</option>
+            <option value="sinal" ${p.tipoPagamento==='sinal'?'selected':''}>🔶 Sinal — resta pagar</option>
+            <option value="sinal-retirada" ${p.tipoPagamento==='sinal-retirada'?'selected':''}>🔶 Sinal + restante na retirada</option>
+            <option value="pago-retirada" ${p.tipoPagamento==='pago-retirada'?'selected':''}>✅ Pago antecipado — vai retirar</option>
+            <option value="total-retirada" ${p.tipoPagamento==='total-retirada'?'selected':''}>🏪 Paga tudo na retirada</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-row" style="margin-top:8px">
+        <div class="f"><label>Valor do Sinal (R$)</label>${inpN('e-sinal',p.valorSinal,'0,00')}</div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h4>◆ OBSERVAÇÕES DO VENDEDOR</h4>
+      <textarea id="e-obsVendedor" placeholder="Observações sobre o pedido…" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:70px;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">${p.obsVendedor||''}</textarea>
+    </div>
+
+    ${isAdmin||isFinanceiro ? `
     <div class="modal-section">
       <h4>◆ ATUALIZAR STATUS DO PEDIDO</h4>
       <select class="status-sel" id="statusEdit">
@@ -734,14 +807,9 @@ function openDetail(id){
       </div>
     </div>
 
-    ${(isAdmin||isFinanceiro) ? `
     <div class="modal-section" style="border-color:rgba(201,168,76,.3)">
       <h4>◆ OBSERVAÇÕES INTERNAS</h4>
-      ${p.obsInterna ? `<div style="background:#0d0d0d;border-radius:3px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:var(--grey2);line-height:1.6">
-        <span style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:4px">Observação atual</span>
-        ${p.obsInterna}
-      </div>` : ''}
-      <textarea id="obsInternaEdit" placeholder="Escreva um recado para o administrador ou financeiro…" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:80px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">${p.obsInterna||''}</textarea>
+      <textarea id="obsInternaEdit" placeholder="Recado para o administrador ou financeiro…" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:80px;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">${p.obsInterna||''}</textarea>
       <p style="font-size:10px;color:var(--grey);margin-top:6px">Visível para todos — editável apenas por Administrador e Financeiro</p>
     </div>` : p.obsInterna ? `
     <div class="modal-section" style="border-color:rgba(201,168,76,.3)">
@@ -770,32 +838,79 @@ function setFinanceiroStatus(id, status){
   saveData();renderCurrent();
 }
 
+function toggleBrindeEdit(i){
+  const isBrinde=document.getElementById(`e-brinde-${i}`).checked;
+  const valorEl=document.getElementById(`e-valor-${i}`);
+  if(valorEl){valorEl.disabled=isBrinde;valorEl.style.opacity=isBrinde?'0.4':'1';}
+}
+
 function saveModal(){
   const p=pedidos.find(x=>x.id===editingId);if(!p)return;
-  const novoStatus=document.getElementById('statusEdit').value;
 
-  // Bloqueia "enviado" se financeiro não confirmou pagamento
-  if(novoStatus==='enviado'&&p.financeiroStatus!=='confirmado'){
-    const aviso=document.getElementById('financeiroAviso');
-    if(aviso){aviso.style.display='block';return;}
+  // Salva dados do cliente
+  const nome=document.getElementById('e-nome');if(nome)p.nome=nome.value.trim();
+  const tel=document.getElementById('e-telefone');if(tel)p.telefone=tel.value.trim();
+  const cpf=document.getElementById('e-cpfcnpj');if(cpf)p.cpfcnpj=cpf.value.trim();
+  const email=document.getElementById('e-email');if(email)p.email=email.value.trim();
+
+  // Salva endereço
+  const end=document.getElementById('e-endereco');if(end)p.endereco=end.value.trim();
+  const bairro=document.getElementById('e-bairro');if(bairro)p.bairro=bairro.value.trim();
+  const cidade=document.getElementById('e-cidade');if(cidade)p.cidade=cidade.value.trim();
+  const estado=document.getElementById('e-estado');if(estado)p.estado=estado.value.trim();
+  const cep=document.getElementById('e-cep');if(cep)p.cep=cep.value.trim();
+
+  // Salva itens editados
+  const itens=p.itens||[];
+  if(itens.length>0){
+    itens.forEach((it,i)=>{
+      const m=document.getElementById(`e-modelo-${i}`);if(m)it.modelo=m.value.trim();
+      const c=document.getElementById(`e-cor-${i}`);if(c)it.cor=c.value.trim();
+      const q=document.getElementById(`e-qtd-${i}`);if(q)it.qtd=parseInt(q.value)||1;
+      const b=document.getElementById(`e-brinde-${i}`);if(b)it.brinde=b.checked;
+      const v=document.getElementById(`e-valor-${i}`);if(v)it.valor=it.brinde?0:(parseFloat(v.value)||0);
+      it.subtotal=it.brinde?0:it.qtd*it.valor;
+    });
+    p.itens=itens;
+    p.valorMercadoria=itens.reduce((s,it)=>s+it.subtotal,0);
+    p.modelo=itens.map(it=>`${it.qtd}x ${it.modelo} (${it.cor})`).join(' | ');
+  } else {
+    // Pedido antigo
+    const m=document.getElementById('e-modelo-old');if(m)p.modelo=m.value.trim();
+    const c=document.getElementById('e-cor-old');if(c)p.cor=c.value.trim();
+    const q=document.getElementById('e-qtd-old');if(q)p.quantidade=parseInt(q.value)||1;
+    const v=document.getElementById('e-valor-old');if(v)p.valorMercadoria=parseFloat(v.value)||0;
   }
 
-  p.status=novoStatus;
-  // Salva nova situação de pagamento (só admin e financeiro)
+  // Salva frete e total
+  const frete=document.getElementById('e-frete');
+  if(frete)p.frete=parseFloat(frete.value)||0;
+  p.total=p.valorMercadoria+p.frete;
+
+  // Salva pagamento
+  const pag=document.getElementById('e-pagamento');if(pag)p.pagamento=pag.value.trim();
+  const tp=document.getElementById('e-tipoPag');if(tp)p.tipoPagamento=tp.value;
+  const sinal=document.getElementById('e-sinal');
+  if(sinal){p.valorSinal=parseFloat(sinal.value)||0;p.sinalConhecido=p.valorSinal>0;}
+
+  // Salva obs vendedor
+  const obsV=document.getElementById('e-obsVendedor');if(obsV)p.obsVendedor=obsV.value.trim();
+
+  // Status (só admin/financeiro)
   if(isAdmin||isFinanceiro){
-    const tpEl=document.getElementById('tipoPagEdit');
-    if(tpEl) p.tipoPagamento=tpEl.value;
-    const sinalEl=document.getElementById('m-sinal');
-    if(sinalEl){const sv=parseFloat(sinalEl.value)||0;p.valorSinal=sv;p.sinalConhecido=sv>0;}
+    const novoStatus=document.getElementById('statusEdit').value;
+    if(novoStatus==='enviado'&&p.financeiroStatus!=='confirmado'){
+      const aviso=document.getElementById('financeiroAviso');
+      if(aviso){aviso.style.display='block';return;}
+    }
+    p.status=novoStatus;
+    const obsI=document.getElementById('obsInternaEdit');if(obsI)p.obsInterna=obsI.value.trim();
   }
-  // Salva observação interna (só admin e financeiro)
-  if(isAdmin||isFinanceiro){
-    const obsEl=document.getElementById('obsInternaEdit');
-    if(obsEl) p.obsInterna=obsEl.value.trim();
-  }
+
   saveData();
   atualizarStatusNaPlanilha(p);
-  renderCurrent();closeModal();
+  renderCurrent();
+  closeModal();
 }
 
 function closeModal(){document.getElementById('detailOverlay').classList.remove('open');}
