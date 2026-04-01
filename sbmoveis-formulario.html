@@ -275,45 +275,34 @@
     <!-- ── PAYMENT TYPE ── -->
     <div class="field" id="f-tipoPagamento">
       <label>Situação do Pagamento <span class="req">*</span></label>
-      <div class="payment-type-grid">
-        <div class="pt-card" id="pt-pago" onclick="selectPayType('pago')">
+      <div class="payment-type-grid" style="grid-template-columns:1fr 1fr">
+        <div class="pt-card" id="pt-pago-entrega" onclick="selectPayType('pago-entrega')">
           <div class="pt-icon">✅</div>
-          <div class="pt-label">PAGO</div>
+          <div class="pt-label">PAGO (ENTREGA)</div>
           <div class="pt-desc">Pagou tudo antecipado</div>
         </div>
-        <div class="pt-card" id="pt-sinal" onclick="selectPayType('sinal')">
-          <div class="pt-icon">🔶</div>
-          <div class="pt-label">SINAL</div>
-          <div class="pt-desc">Deu entrada, paga restante antes da entrega</div>
+        <div class="pt-card" id="pt-pago-retirada" onclick="selectPayType('pago-retirada')">
+          <div class="pt-icon">✅</div>
+          <div class="pt-label">PAGO (RETIRADA)</div>
+          <div class="pt-desc">Pagou tudo, vai retirar</div>
         </div>
-        <div class="pt-card" id="pt-retirada" onclick="selectPayType('retirada')">
+        <div class="pt-card" id="pt-sinal-entrega" onclick="selectPayType('sinal-entrega')">
+          <div class="pt-icon">🔶</div>
+          <div class="pt-label">SINAL (ENTREGA)</div>
+          <div class="pt-desc">Deu sinal, resta antes do envio</div>
+        </div>
+        <div class="pt-card" id="pt-sinal-retirada" onclick="selectPayType('sinal-retirada')">
+          <div class="pt-icon">🔶</div>
+          <div class="pt-label">SINAL (RETIRADA)</div>
+          <div class="pt-desc">Deu sinal, resta na retirada</div>
+        </div>
+        <div class="pt-card" id="pt-retirada" onclick="selectPayType('retirada')" style="grid-column:1/-1">
           <div class="pt-icon">🏪</div>
           <div class="pt-label">RETIRADA</div>
+          <div class="pt-desc">Paga tudo na retirada</div>
         </div>
       </div>
       <input type="hidden" id="tipoPagamento"/>
-    </div>
-
-    <!-- Sub-opções retirada -->
-    <div class="signal-box" id="retiradaBox" style="display:none;border-color:var(--blue)">
-      <div class="signal-box-title" style="color:var(--blue)">◆ Como será o pagamento na retirada?</div>
-      <div class="payment-type-grid" style="grid-template-columns:1fr 1fr 1fr;">
-        <div class="pt-card" id="pr-sinal-retirada" onclick="selectRetiradaTipo('sinal-retirada')">
-          <div class="pt-icon">🔶</div>
-          <div class="pt-label" style="font-size:11px">SINAL + RETIRADA</div>
-          <div class="pt-desc">Deu sinal, paga restante ao retirar</div>
-        </div>
-        <div class="pt-card" id="pr-pago-retirada" onclick="selectRetiradaTipo('pago-retirada')">
-          <div class="pt-icon">✅</div>
-          <div class="pt-label" style="font-size:11px">PAGO ANTECIPADO</div>
-          <div class="pt-desc">Pagou tudo, só vai retirar</div>
-        </div>
-        <div class="pt-card" id="pr-total-retirada" onclick="selectRetiradaTipo('total-retirada')">
-          <div class="pt-icon">🏪</div>
-          <div class="pt-label" style="font-size:11px">PAGA NA RETIRADA</div>
-          <div class="pt-desc">Paga tudo quando vier buscar</div>
-        </div>
-      </div>
     </div>
 
     <!-- Signal box -->
@@ -607,32 +596,25 @@ function toggleSemNumero(){
 
 // ── Payment type ──
 function selectPayType(type){
-  ['pago','sinal','retirada'].forEach(t=>{
+  ['pago-entrega','pago-retirada','sinal-entrega','sinal-retirada','retirada'].forEach(t=>{
     const el=document.getElementById('pt-'+t);
     if(el) el.classList.remove('sel-green','sel-orange','sel-blue');
   });
-  const colorMap={pago:'sel-green',sinal:'sel-orange',retirada:'sel-blue'};
-  document.getElementById('pt-'+type).classList.add(colorMap[type]);
+  const colorMap={
+    'pago-entrega':'sel-green',
+    'pago-retirada':'sel-green',
+    'sinal-entrega':'sel-orange',
+    'sinal-retirada':'sel-orange',
+    'retirada':'sel-blue'
+  };
+  const el=document.getElementById('pt-'+type);
+  if(el) el.classList.add(colorMap[type]);
   document.getElementById('tipoPagamento').value=type;
-  document.getElementById('signalBox').style.display=type==='sinal'?'block':'none';
-  document.getElementById('retiradaBox').style.display=type==='retirada'?'block':'none';
-  // Reset retirada sub-opcao
-  if(type!=='retirada') S.retiradaTipo='';
+  // Mostra sinal box para opções com sinal
+  const temSinal = type==='sinal-entrega'||type==='sinal-retirada';
+  document.getElementById('signalBox').style.display=temSinal?'block':'none';
   if(document.getElementById('f-tipoPagamento').classList.contains('err'))
     document.getElementById('f-tipoPagamento').classList.remove('err');
-  calcTotal();
-}
-
-function selectRetiradaTipo(tipo){
-  ['sinal-retirada','pago-retirada','total-retirada'].forEach(t=>{
-    const el=document.getElementById('pr-'+t);
-    if(el) el.classList.remove('sel-orange','sel-green','sel-blue');
-  });
-  const colorMap={'sinal-retirada':'sel-orange','pago-retirada':'sel-green','total-retirada':'sel-blue'};
-  document.getElementById('pr-'+tipo).classList.add(colorMap[tipo]);
-  S.retiradaTipo=tipo;
-  // Mostrar sinal box se for sinal+retirada
-  document.getElementById('signalBox').style.display=tipo==='sinal-retirada'?'block':'none';
   calcTotal();
 }
 
@@ -678,36 +660,29 @@ function calcTotal(){
   sinalRow.style.display='none'; restaRow.style.display='none';
   retiradaRow.style.display='none'; badgeWrap.style.display='none';
 
-  if(tipo==='pago'){
+  const known=document.getElementById('sinalConhecido').checked;
+  const sinal=parseFloat(document.getElementById('valorSinal').value)||0;
+
+  if(tipo==='pago-entrega'){
     badgeWrap.style.display='block';
-    badgeWrap.innerHTML='<span class="pay-status-badge pago">✅ PAGO INTEGRAL</span>';
-  } else if(tipo==='sinal'){
-    const known=document.getElementById('sinalConhecido').checked;
-    const sinal=parseFloat(document.getElementById('valorSinal').value)||0;
-    const resta=total-sinal;
+    badgeWrap.innerHTML='<span class="pay-status-badge pago">✅ PAGO — ENTREGA</span>';
+  } else if(tipo==='pago-retirada'){
+    badgeWrap.style.display='block';
+    badgeWrap.innerHTML='<span class="pay-status-badge pago">✅ PAGO — VAI RETIRAR</span>';
+  } else if(tipo==='sinal-entrega'){
     sinalRow.style.display='flex'; restaRow.style.display='flex'; badgeWrap.style.display='block';
     document.getElementById('s-sinal').textContent=known&&sinal>0?fmtBRL(sinal):'A definir';
-    document.getElementById('s-resta').textContent=known&&sinal>0?fmtBRL(resta>0?resta:0):'A definir';
+    document.getElementById('s-resta').textContent=known&&sinal>0?fmtBRL(Math.max(0,total-sinal)):'A definir';
     badgeWrap.innerHTML='<span class="pay-status-badge sinal">🔶 SINAL — RESTA ANTES DA ENTREGA</span>';
+  } else if(tipo==='sinal-retirada'){
+    sinalRow.style.display='flex'; restaRow.style.display='flex'; badgeWrap.style.display='block';
+    document.getElementById('s-sinal').textContent=known&&sinal>0?fmtBRL(sinal):'A definir';
+    document.getElementById('s-resta').textContent=known&&sinal>0?fmtBRL(Math.max(0,total-sinal)):'A definir';
+    badgeWrap.innerHTML='<span class="pay-status-badge sinal">🔶 SINAL — RESTA NA RETIRADA</span>';
   } else if(tipo==='retirada'){
-    const sub=S.retiradaTipo;
-    badgeWrap.style.display='block';
-    if(sub==='sinal-retirada'){
-      const known=document.getElementById('sinalConhecido').checked;
-      const sinal=parseFloat(document.getElementById('valorSinal').value)||0;
-      sinalRow.style.display='flex'; restaRow.style.display='flex';
-      document.getElementById('s-sinal').textContent=known&&sinal>0?fmtBRL(sinal):'A definir';
-      document.getElementById('s-resta').textContent=known&&sinal>0?fmtBRL(Math.max(0,total-sinal)):'A definir';
-      badgeWrap.innerHTML='<span class="pay-status-badge sinal">🔶 SINAL + RESTANTE NA RETIRADA</span>';
-    } else if(sub==='pago-retirada'){
-      badgeWrap.innerHTML='<span class="pay-status-badge pago">✅ PAGO ANTECIPADO — VAI RETIRAR</span>';
-    } else if(sub==='total-retirada'){
-      retiradaRow.style.display='flex';
-      document.getElementById('s-retirada-val').textContent=fmtBRL(total);
-      badgeWrap.innerHTML='<span class="pay-status-badge retirada">🏪 PAGA TUDO NA RETIRADA</span>';
-    } else {
-      badgeWrap.innerHTML='<span class="pay-status-badge retirada">🏪 RETIRADA — selecione a opção abaixo</span>';
-    }
+    retiradaRow.style.display='flex'; badgeWrap.style.display='block';
+    document.getElementById('s-retirada-val').textContent=fmtBRL(total);
+    badgeWrap.innerHTML='<span class="pay-status-badge retirada">🏪 PAGA TUDO NA RETIRADA</span>';
   }
 }
 
@@ -752,19 +727,12 @@ function finishStep1(){
     document.getElementById('f-tipoPagamento').scrollIntoView({behavior:'smooth',block:'center'});
     return;
   }
-  if(tipo==='retirada'&&!S.retiradaTipo){
-    document.getElementById('retiradaBox').scrollIntoView({behavior:'smooth',block:'center'});
-    document.getElementById('retiradaBox').style.border='2px solid var(--red)';
-    setTimeout(()=>document.getElementById('retiradaBox').style.border='',2000);
-    return;
-  }
-
   S.vendedor=document.getElementById('vendedor').value.trim();
   S.dataPedido=document.getElementById('dataPedido').value;
   S.itens=itens;
   S.frete=parseFloat(document.getElementById('frete').value)||0;
   S.pagamento=document.getElementById('pagamento').value.trim();
-  S.tipoPagamento=tipo==='retirada'?S.retiradaTipo:tipo;
+  S.tipoPagamento=tipo;
   S.sinalConhecido=document.getElementById('sinalConhecido').checked;
   S.valorSinal=S.sinalConhecido?(parseFloat(document.getElementById('valorSinal').value)||0):0;
   S.obsVendedor=document.getElementById('obsVendedor').value.trim();
@@ -805,19 +773,19 @@ function finishStep1(){
   });
 
   const tipoMap={
-    pago:'✅ PAGO INTEGRAL',
-    sinal:'🔶 SINAL — RESTA PAGAR ANTES DA ENTREGA',
-    'sinal-retirada':'🔶 SINAL — RESTANTE PAGA NA RETIRADA',
-    'pago-retirada':'✅ PAGO ANTECIPADO — VAI RETIRAR',
-    'total-retirada':'🏪 PAGA TUDO NA RETIRADA'
+    'pago-entrega':   '✅ PAGO — ENTREGA',
+    'pago-retirada':  '✅ PAGO — VAI RETIRAR',
+    'sinal-entrega':  '🔶 SINAL — RESTA ANTES DA ENTREGA',
+    'sinal-retirada': '🔶 SINAL — RESTA NA RETIRADA',
+    'retirada':       '🏪 PAGA TUDO NA RETIRADA'
   };
   let pagLines=`*SITUAÇÃO PAGAMENTO:* ${tipoMap[S.tipoPagamento]||S.tipoPagamento}`;
-  if(S.tipoPagamento==='sinal'||S.tipoPagamento==='sinal-retirada'){
+  if(S.tipoPagamento==='sinal-entrega'||S.tipoPagamento==='sinal-retirada'){
     pagLines+=S.sinalConhecido&&S.valorSinal>0
       ?`\n*SINAL PAGO:* ${fmtBRL(S.valorSinal)}\n*RESTA PAGAR:* ${fmtBRL(Math.max(0,total-S.valorSinal))}`
       :'\n*SINAL:* A definir com financeiro';
   }
-  if(S.tipoPagamento==='total-retirada'||S.tipoPagamento==='pago-retirada')
+  if(S.tipoPagamento==='retirada')
     pagLines+=`\n*VALOR:* ${fmtBRL(total)}`;
 
   const dataFormatada=S.dataPedido?new Date(S.dataPedido+'T12:00:00').toLocaleDateString('pt-BR'):new Date().toLocaleDateString('pt-BR');
@@ -915,20 +883,19 @@ function buildFinalMsg(){
   const subtotal=itens.reduce((s,i)=>s+i.subtotal,0);
   const total=subtotal+S.frete;
   const tipoMap={
-    pago:'✅ PAGO INTEGRAL',
-    sinal:'🔶 SINAL — RESTA PAGAR ANTES DA ENTREGA',
-    'sinal-retirada':'🔶 SINAL — RESTANTE PAGA NA RETIRADA',
-    'pago-retirada':'✅ PAGO ANTECIPADO — VAI RETIRAR',
-    'total-retirada':'🏪 PAGA TUDO NA RETIRADA'
+    'pago-entrega':   '✅ PAGO — ENTREGA',
+    'pago-retirada':  '✅ PAGO — VAI RETIRAR',
+    'sinal-entrega':  '🔶 SINAL — RESTA ANTES DA ENTREGA',
+    'sinal-retirada': '🔶 SINAL — RESTA NA RETIRADA',
+    'retirada':       '🏪 PAGA TUDO NA RETIRADA'
   };
   let pagLines=`*SITUAÇÃO PAGAMENTO:* ${tipoMap[S.tipoPagamento]||S.tipoPagamento}`;
-  if(S.tipoPagamento==='sinal'||S.tipoPagamento==='sinal-retirada'){
+  if(S.tipoPagamento==='sinal-entrega'||S.tipoPagamento==='sinal-retirada'){
     pagLines+=S.sinalConhecido&&S.valorSinal>0
       ?`\n*SINAL PAGO:* ${fmtBRL(S.valorSinal)}\n*RESTA PAGAR:* ${fmtBRL(Math.max(0,total-S.valorSinal))}`
       :'\n*SINAL:* A definir com financeiro';
   }
-  if(S.tipoPagamento==='total-retirada'||S.tipoPagamento==='pago-retirada')
-    pagLines+=`\n*VALOR:* ${fmtBRL(total)}`;
+  if(S.tipoPagamento==='retirada') pagLines+=`\n*VALOR:* ${fmtBRL(total)}`;
 
   const dataFormatada=S.dataPedido?new Date(S.dataPedido+'T12:00:00').toLocaleDateString('pt-BR'):new Date().toLocaleDateString('pt-BR');
   const itensLinhas=itens.map((it,i)=>`\n*PRODUTO ${i+1}:* ${it.modelo}\n*COR:* ${it.cor}\n*QUANTIDADE:* ${it.qtd}\n${it.brinde?'*VALOR:* 🎁 BRINDE':`*VALOR UNIT.:* ${fmtBRL(it.valor)}\n*SUBTOTAL:* ${fmtBRL(it.subtotal)}`}`).join('\n─────────────────');
