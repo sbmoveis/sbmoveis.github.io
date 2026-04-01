@@ -1179,9 +1179,30 @@ async function atualizarStatusNaPlanilha(p){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         _acao:'atualizar',
-        id:p.id,status:p.status,
+        id:p.id,
+        status:p.status,
         valorSinal:p.valorSinal||0,
-        sinalConhecido:p.sinalConhecido||false
+        sinalConhecido:p.sinalConhecido||false,
+        historico:p.historico||[],
+        obsInterna:p.obsInterna||'',
+        obsLogistica:p.obsLogistica||'',
+        financeiroStatus:p.financeiroStatus||'nao-confirmado',
+        financeiroData:p.financeiroData||'',
+        tipoPagamento:p.tipoPagamento||'',
+        nome:p.nome||'',
+        telefone:p.telefone||'',
+        cpfcnpj:p.cpfcnpj||'',
+        endereco:p.endereco||'',
+        bairro:p.bairro||'',
+        cidade:p.cidade||'',
+        estado:p.estado||'',
+        cep:p.cep||'',
+        frete:p.frete||0,
+        total:p.total||0,
+        pagamento:p.pagamento||'',
+        valorMercadoria:p.valorMercadoria||0,
+        modelo:p.modelo||'',
+        itens:p.itens||[]
       })
     });
   }catch(e){console.warn('Erro ao sincronizar:',e);}
