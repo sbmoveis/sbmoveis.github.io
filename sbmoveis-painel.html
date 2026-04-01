@@ -827,23 +827,16 @@ function openDetail(id){
       <div id="financeiroAviso" style="display:none;margin-top:10px;background:rgba(224,85,85,.1);border:1px solid var(--red);border-radius:3px;padding:10px 14px;font-size:13px;color:var(--red)">
         ⚠️ O financeiro ainda não confirmou o pagamento deste pedido. Não é possível marcar como Enviado.
       </div>
-    </div>
-
-    <div class="modal-section" style="border-color:rgba(91,156,246,.3)">
-      <h4>◆ OBSERVAÇÕES DA LOGÍSTICA</h4>
-      ${isLogistica||isAdmin ? `
-      <textarea id="obsLogisticaEdit" placeholder="Observações sobre envio, entrega, transportadora…" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:70px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">${p.obsLogistica||''}</textarea>
-      <p style="font-size:10px;color:var(--grey);margin-top:6px">Visível para todos — editável apenas por Logística e Administrador</p>
-      ` : p.obsLogistica ? `
-      <div style="background:#0d0d0d;border-radius:3px;padding:12px;font-size:13px;color:var(--grey2);line-height:1.6">${p.obsLogistica}</div>
-      ` : '<p style="font-size:12px;color:var(--grey)">Nenhuma observação da logística.</p>'}
-    </div>`
-    : p.obsLogistica ? `
-    <div class="modal-section" style="border-color:rgba(91,156,246,.3)">
-      <h4>◆ OBSERVAÇÕES DA LOGÍSTICA</h4>
-      <div style="background:#0d0d0d;border-radius:3px;padding:12px;font-size:13px;color:var(--grey2);line-height:1.6">${p.obsLogistica}</div>
     </div>` : ''}
 
+    <div class="modal-section" style="border-color:rgba(91,156,246,.3)">
+      <h4>◆ OBSERVAÇÕES DA LOGÍSTICA</h4>
+      ${(isLogistica||isAdmin) ? `<textarea id="obsLogisticaEdit" placeholder="Observações sobre envio, entrega, transportadora…" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:70px;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">${p.obsLogistica||''}</textarea><p style="font-size:10px;color:var(--grey);margin-top:6px">Visível para todos — editável apenas por Logística e Administrador</p>`
+      : p.obsLogistica ? `<div style="background:#0d0d0d;border-radius:3px;padding:12px;font-size:13px;color:var(--grey2);line-height:1.6">${p.obsLogistica}</div>`
+      : `<p style="font-size:12px;color:var(--grey)">Nenhuma observação da logística.</p>`}
+    </div>
+
+    ${(isAdmin||isFinanceiro) ? `
     <div class="modal-section" style="border-color:rgba(201,168,76,.3)">
       <h4>◆ OBSERVAÇÕES INTERNAS</h4>
       <textarea id="obsInternaEdit" placeholder="Recado para o administrador ou financeiro…" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:80px;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">${p.obsInterna||''}</textarea>
