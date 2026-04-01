@@ -773,7 +773,14 @@ function openDetail(id){
       <h4>◆ PRODUTOS</h4>
       ${itensEditHtml}
       <div class="modal-row" style="margin-top:8px">
-        <div class="f"><label>Frete (R$)</label>${inpN('e-frete',p.frete,'0,00')}</div>
+        <div class="f">
+          <label>Frete (R$)</label>
+          ${inpN('e-frete',p.frete,'0,00')}
+          <label style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer;font-size:12px;color:var(--blue);font-weight:500;letter-spacing:0;text-transform:none">
+            <input type="checkbox" id="e-freteRetirada" ${!p.frete||p.frete==0?'checked':''} onchange="toggleFreteRetiradaModal()" style="width:14px;height:14px;accent-color:var(--blue);cursor:pointer"/>
+            🏪 Retirada — sem frete
+          </label>
+        </div>
       </div>
     </div>
 
@@ -845,6 +852,13 @@ function setFinanceiroStatus(id, status){
   const agora=new Date();
   p.financeiroData=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   saveData();renderCurrent();
+}
+
+function toggleFreteRetiradaModal(){
+  const checked=document.getElementById('e-freteRetirada').checked;
+  const freteEl=document.getElementById('e-frete');
+  if(checked){freteEl.value='0';freteEl.disabled=true;freteEl.style.opacity='0.4';}
+  else{freteEl.disabled=false;freteEl.style.opacity='1';}
 }
 
 function toggleBrindeEdit(i){
