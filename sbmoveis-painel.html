@@ -598,7 +598,16 @@ function buildTable(data,mode){
         ${payInfo}
       </td>
       <td>
-        <span class="pay-badge pay-badge-${p.tipoPagamento}">${p.tipoPagamento==='pago'?'✅ Pago':p.tipoPagamento==='sinal'?'🔶 Resta pagar':'🏪 Retirada'}</span>
+        <span class="pay-badge pay-badge-${p.tipoPagamento}">${
+          p.tipoPagamento==='pago-entrega'?'✅ Pago (Entrega)':
+          p.tipoPagamento==='pago-retirada'?'✅ Pago (Retirada)':
+          p.tipoPagamento==='sinal-entrega'?'🔶 Sinal (Entrega)':
+          p.tipoPagamento==='sinal-retirada'?'🔶 Sinal (Retirada)':
+          p.tipoPagamento==='retirada'?'🏪 Retirada':
+          p.tipoPagamento==='pago'?'✅ Pago':
+          p.tipoPagamento==='sinal'?'🔶 Sinal':
+          '🏪 Retirada'
+        }</span>
       </td>
       <td>${financeiroCell}</td>
       <td><span class="badge badge-${p.status}">${ORDER_STATUS_LABELS[p.status]||p.status}</span></td>
@@ -774,11 +783,11 @@ function openDetail(id){
         <div class="f"><label>Forma de Pagamento</label>${inp('e-pagamento',p.pagamento,'Ex: PIX, Cartão 3x…')}</div>
         <div class="f"><label>Situação</label>
           <select id="e-tipoPag" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;">
-            <option value="pago" ${p.tipoPagamento==='pago'?'selected':''}>✅ Pago integral</option>
-            <option value="sinal" ${p.tipoPagamento==='sinal'?'selected':''}>🔶 Sinal — resta pagar</option>
-            <option value="sinal-retirada" ${p.tipoPagamento==='sinal-retirada'?'selected':''}>🔶 Sinal + restante na retirada</option>
-            <option value="pago-retirada" ${p.tipoPagamento==='pago-retirada'?'selected':''}>✅ Pago antecipado — vai retirar</option>
-            <option value="total-retirada" ${p.tipoPagamento==='total-retirada'?'selected':''}>🏪 Paga tudo na retirada</option>
+            <option value="pago-entrega" ${p.tipoPagamento==='pago-entrega'?'selected':''}>✅ Pago — Entrega</option>
+            <option value="pago-retirada" ${p.tipoPagamento==='pago-retirada'?'selected':''}>✅ Pago — Vai Retirar</option>
+            <option value="sinal-entrega" ${p.tipoPagamento==='sinal-entrega'?'selected':''}>🔶 Sinal — Resta antes da entrega</option>
+            <option value="sinal-retirada" ${p.tipoPagamento==='sinal-retirada'?'selected':''}>🔶 Sinal — Resta na retirada</option>
+            <option value="retirada" ${p.tipoPagamento==='retirada'?'selected':''}>🏪 Paga tudo na retirada</option>
           </select>
         </div>
       </div>
