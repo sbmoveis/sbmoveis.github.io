@@ -714,11 +714,15 @@ function openDetail(id){
     }
   }
 
-  const isVendedor = !isAdmin && !isFinanceiro;
-  const inp = (id,val,ph='')=>`<input type="text" id="${id}" value="${(val||'').replace(/"/g,'&quot;')}" placeholder="${ph}" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"/>`;
-  const inpN = (id,val,ph='')=>`<input type="number" id="${id}" value="${val||''}" placeholder="${ph}" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"/>`;
+  const isVendedor = !isAdmin && !isFinanceiro && !isLogistica;
+  const inp = (id,val,ph='')=>isLogistica
+    ? `<div style="padding:9px 12px;background:#0d0d0d;border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--grey2)">${val||'–'}</div>`
+    : `<input type="text" id="${id}" value="${(val||'').replace(/"/g,'&quot;')}" placeholder="${ph}" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"/>`;
+  const inpN = (id,val,ph='')=>isLogistica
+    ? `<div style="padding:9px 12px;background:#0d0d0d;border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--grey2)">${val||'–'}</div>`
+    : `<input type="number" id="${id}" value="${val||''}" placeholder="${ph}" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">/>`;
 
-  // Itens do pedido editáveis
+  // Itens do pedido — editáveis só para não-logistica
   const itens = p.itens||[];
   const itensEditHtml = itens.length>0 ? itens.map((it,i)=>`
     <div style="background:#0d0d0d;border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:10px">
@@ -731,10 +735,10 @@ function openDetail(id){
         <div class="f"><label>Quantidade</label>${inpN(`e-qtd-${i}`,it.qtd)}</div>
         <div class="f"><label>Valor Unit. (R$)</label>${inpN(`e-valor-${i}`,it.valor,'0,00')}</div>
       </div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green);cursor:pointer;margin-top:8px">
+      ${!isLogistica?`<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green);cursor:pointer;margin-top:8px">
         <input type="checkbox" id="e-brinde-${i}" ${it.brinde?'checked':''} onchange="toggleBrindeEdit(${i})" style="width:15px;height:15px;accent-color:var(--green)"/>
         🎁 Brinde
-      </label>
+      </label>`:`<div style="font-size:12px;color:var(--green);margin-top:6px">${it.brinde?'🎁 Brinde':''}</div>`}
     </div>`).join('')
   : `<div style="background:#0d0d0d;border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:10px">
       <div class="modal-row">
@@ -792,6 +796,11 @@ function openDetail(id){
 
     <div class="modal-section">
       <h4>◆ PAGAMENTO</h4>
+      ${isLogistica ? `
+      <div class="modal-row">
+        <div class="f"><label>Forma de Pagamento</label><div style="padding:9px 12px;background:#0d0d0d;border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--grey2)">${p.pagamento||'–'}</div></div>
+        <div class="f"><label>Situação</label><div style="padding:9px 12px;background:#0d0d0d;border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--grey2)">${p.tipoPagamento||'–'}</div></div>
+      </div>` : `
       <div class="modal-row">
         <div class="f"><label>Forma de Pagamento</label>${inp('e-pagamento',p.pagamento,'Ex: PIX, Cartão 3x…')}</div>
         <div class="f"><label>Situação</label>
@@ -806,12 +815,14 @@ function openDetail(id){
       </div>
       <div class="modal-row" style="margin-top:8px">
         <div class="f"><label>Valor do Sinal (R$)</label>${inpN('e-sinal',p.valorSinal,'0,00')}</div>
-      </div>
+      </div>`}
     </div>
 
     <div class="modal-section">
       <h4>◆ OBSERVAÇÕES DO VENDEDOR</h4>
-      <textarea id="e-obsVendedor" placeholder="Observações sobre o pedido…" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:70px;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">${p.obsVendedor||''}</textarea>
+      ${isLogistica
+        ? `<div style="background:#0d0d0d;border-radius:3px;padding:12px;font-size:13px;color:var(--grey2);line-height:1.6">${p.obsVendedor||'Nenhuma observação.'}</div>`
+        : `<textarea id="e-obsVendedor" placeholder="Observações sobre o pedido…" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:70px;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">${p.obsVendedor||''}</textarea>`}
     </div>
 
     ${isAdmin||isFinanceiro||isLogistica ? `
@@ -908,53 +919,55 @@ function saveModal(){
     modelo:p.modelo
   };
 
-  // Salva dados do cliente
-  const nome=document.getElementById('e-nome');if(nome)p.nome=nome.value.trim();
-  const tel=document.getElementById('e-telefone');if(tel)p.telefone=tel.value.trim();
-  const cpf=document.getElementById('e-cpfcnpj');if(cpf)p.cpfcnpj=cpf.value.trim();
-  const email=document.getElementById('e-email');if(email)p.email=email.value.trim();
+  // Salva dados do cliente (não logistica)
+  if(!isLogistica){
+    const nome=document.getElementById('e-nome');if(nome)p.nome=nome.value.trim();
+    const tel=document.getElementById('e-telefone');if(tel)p.telefone=tel.value.trim();
+    const cpf=document.getElementById('e-cpfcnpj');if(cpf)p.cpfcnpj=cpf.value.trim();
+    const email=document.getElementById('e-email');if(email)p.email=email.value.trim();
 
-  // Salva endereço
-  const end=document.getElementById('e-endereco');if(end)p.endereco=end.value.trim();
-  const bairro=document.getElementById('e-bairro');if(bairro)p.bairro=bairro.value.trim();
-  const cidade=document.getElementById('e-cidade');if(cidade)p.cidade=cidade.value.trim();
-  const estado=document.getElementById('e-estado');if(estado)p.estado=estado.value.trim();
-  const cep=document.getElementById('e-cep');if(cep)p.cep=cep.value.trim();
+    // Salva endereço
+    const end=document.getElementById('e-endereco');if(end)p.endereco=end.value.trim();
+    const bairro=document.getElementById('e-bairro');if(bairro)p.bairro=bairro.value.trim();
+    const cidade=document.getElementById('e-cidade');if(cidade)p.cidade=cidade.value.trim();
+    const estado=document.getElementById('e-estado');if(estado)p.estado=estado.value.trim();
+    const cep=document.getElementById('e-cep');if(cep)p.cep=cep.value.trim();
 
-  // Salva itens editados
-  const itens=p.itens||[];
-  if(itens.length>0){
-    itens.forEach((it,i)=>{
-      const m=document.getElementById(`e-modelo-${i}`);if(m)it.modelo=m.value.trim();
-      const c=document.getElementById(`e-cor-${i}`);if(c)it.cor=c.value.trim();
-      const q=document.getElementById(`e-qtd-${i}`);if(q)it.qtd=parseInt(q.value)||1;
-      const b=document.getElementById(`e-brinde-${i}`);if(b)it.brinde=b.checked;
-      const v=document.getElementById(`e-valor-${i}`);if(v)it.valor=it.brinde?0:(parseFloat(v.value)||0);
-      it.subtotal=it.brinde?0:it.qtd*it.valor;
-    });
-    p.itens=itens;
-    p.valorMercadoria=itens.reduce((s,it)=>s+it.subtotal,0);
-    p.modelo=itens.map(it=>`${it.qtd}x ${it.modelo} (${it.cor})`).join(' | ');
-  } else {
-    const m=document.getElementById('e-modelo-old');if(m)p.modelo=m.value.trim();
-    const c=document.getElementById('e-cor-old');if(c)p.cor=c.value.trim();
-    const q=document.getElementById('e-qtd-old');if(q)p.quantidade=parseInt(q.value)||1;
-    const v=document.getElementById('e-valor-old');if(v)p.valorMercadoria=parseFloat(v.value)||0;
+    // Salva itens editados
+    const itens=p.itens||[];
+    if(itens.length>0){
+      itens.forEach((it,i)=>{
+        const m=document.getElementById(`e-modelo-${i}`);if(m)it.modelo=m.value.trim();
+        const c=document.getElementById(`e-cor-${i}`);if(c)it.cor=c.value.trim();
+        const q=document.getElementById(`e-qtd-${i}`);if(q)it.qtd=parseInt(q.value)||1;
+        const b=document.getElementById(`e-brinde-${i}`);if(b)it.brinde=b.checked;
+        const v=document.getElementById(`e-valor-${i}`);if(v)it.valor=it.brinde?0:(parseFloat(v.value)||0);
+        it.subtotal=it.brinde?0:it.qtd*it.valor;
+      });
+      p.itens=itens;
+      p.valorMercadoria=itens.reduce((s,it)=>s+it.subtotal,0);
+      p.modelo=itens.map(it=>`${it.qtd}x ${it.modelo} (${it.cor})`).join(' | ');
+    } else {
+      const m=document.getElementById('e-modelo-old');if(m)p.modelo=m.value.trim();
+      const c=document.getElementById('e-cor-old');if(c)p.cor=c.value.trim();
+      const q=document.getElementById('e-qtd-old');if(q)p.quantidade=parseInt(q.value)||1;
+      const v=document.getElementById('e-valor-old');if(v)p.valorMercadoria=parseFloat(v.value)||0;
+    }
+
+    // Salva frete e total
+    const frete=document.getElementById('e-frete');
+    if(frete)p.frete=parseFloat(frete.value)||0;
+    p.total=p.valorMercadoria+p.frete;
+
+    // Salva pagamento
+    const pag=document.getElementById('e-pagamento');if(pag)p.pagamento=pag.value.trim();
+    const tp=document.getElementById('e-tipoPag');if(tp)p.tipoPagamento=tp.value;
+    const sinal=document.getElementById('e-sinal');
+    if(sinal){p.valorSinal=parseFloat(sinal.value)||0;p.sinalConhecido=p.valorSinal>0;}
+
+    // Salva obs vendedor
+    const obsV=document.getElementById('e-obsVendedor');if(obsV)p.obsVendedor=obsV.value.trim();
   }
-
-  // Salva frete e total
-  const frete=document.getElementById('e-frete');
-  if(frete)p.frete=parseFloat(frete.value)||0;
-  p.total=p.valorMercadoria+p.frete;
-
-  // Salva pagamento
-  const pag=document.getElementById('e-pagamento');if(pag)p.pagamento=pag.value.trim();
-  const tp=document.getElementById('e-tipoPag');if(tp)p.tipoPagamento=tp.value;
-  const sinal=document.getElementById('e-sinal');
-  if(sinal){p.valorSinal=parseFloat(sinal.value)||0;p.sinalConhecido=p.valorSinal>0;}
-
-  // Salva obs vendedor
-  const obsV=document.getElementById('e-obsVendedor');if(obsV)p.obsVendedor=obsV.value.trim();
 
   // Status (admin, financeiro e logistica)
   if(isAdmin||isFinanceiro||isLogistica){
