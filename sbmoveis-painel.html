@@ -764,6 +764,9 @@ function openDetail(id){
         <div class="f"><label>CPF/CNPJ</label>${inp('e-cpfcnpj',p.cpfcnpj)}</div>
         <div class="f"><label>E-mail</label>${inp('e-email',p.email)}</div>
       </div>
+      ${!isLogistica?`<div class="modal-row">
+        <div class="f"><label>Data do Pedido</label><input type="date" id="e-data" value="${p.data&&p.data.includes('/')?p.data.split('/').reverse().join('-'):p.data||''}" style="width:100%;background:#161616;border:1px solid var(--border);border-radius:3px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"/></div>
+      </div>`:`<div class="modal-row"><div class="f"><label>Data do Pedido</label><div style="padding:9px 12px;background:#0d0d0d;border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--grey2)">${fmtDate(p.data)}</div></div></div>`}
     </div>
 
     <div class="modal-section">
@@ -925,6 +928,11 @@ function saveModal(){
     const tel=document.getElementById('e-telefone');if(tel)p.telefone=tel.value.trim();
     const cpf=document.getElementById('e-cpfcnpj');if(cpf)p.cpfcnpj=cpf.value.trim();
     const email=document.getElementById('e-email');if(email)p.email=email.value.trim();
+    const dataEl=document.getElementById('e-data');
+    if(dataEl&&dataEl.value){
+      const [y,m,d]=dataEl.value.split('-');
+      p.data=`${d}/${m}/${y}`;
+    }
 
     // Salva endereço
     const end=document.getElementById('e-endereco');if(end)p.endereco=end.value.trim();
