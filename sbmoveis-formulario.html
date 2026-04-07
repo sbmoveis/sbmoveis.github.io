@@ -616,6 +616,8 @@ function mascaraData(el){
   if(v.length>=6) v=v.substring(0,5)+'/'+v.substring(5,9);
   el.value=v;
 }
+
+function toggleSemNumero(){
   const sn=document.getElementById('semNumero').checked;
   const nEl=document.getElementById('numero');
   if(sn){nEl.value='S/N';nEl.disabled=true;nEl.style.opacity='0.5';}
@@ -1164,7 +1166,8 @@ async function verificarSenha(){
   if(hashHex === SENHA_HASH){
     document.getElementById('senhaErro').style.display='none';
     setStep('vendor');
-    adicionarItem();
+    // Só adiciona item se container estiver vazio
+    if(document.querySelectorAll('.item-card').length === 0) adicionarItem();
   } else {
     document.getElementById('senhaErro').style.display='block';
     document.getElementById('senhaVendedor').value='';
