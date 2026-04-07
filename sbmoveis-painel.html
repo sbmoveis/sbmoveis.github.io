@@ -224,14 +224,24 @@
     .login-box{padding:32px 24px;}
   }
 
+  /* Toast */
+  .toast{position:fixed;bottom:24px;right:24px;padding:13px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:600;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:all .3s var(--ease-out);pointer-events:none;max-width:320px;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.success{background:#0d2b1a;border:1px solid var(--green);color:var(--green);}
+  .toast.error{background:#2b0d0d;border:1px solid var(--red);color:var(--red);}
+  .toast.loading{background:#0d1a2b;border:1px solid var(--blue);color:var(--blue);}
+
   @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
   @keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   @keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
   @keyframes goldPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 0 6px rgba(201,168,76,0)}}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+
+<div class="toast" id="toast"></div>
 
 <!-- LOGIN -->
 <div id="loginScreen">
@@ -894,7 +904,9 @@ function setFinanceiroStatus(id, status){
   p.financeiroOk=(status==='confirmado');
   const agora=new Date();
   p.financeiroData=agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  saveData();renderCurrent();
+  saveData();
+  atualizarStatusNaPlanilha(p);
+  renderCurrent();
 }
 
 function toggleFreteRetiradaModal(){
@@ -1190,13 +1202,27 @@ function fmtDate(s){
   return str;
 }
 
+// ── Toast ──
+let toastTimer=null;
+function showToast(msg, type='success', duration=3000){
+  const t=document.getElementById('toast');
+  if(!t) return;
+  clearTimeout(toastTimer);
+  t.className='toast '+type;
+  t.innerHTML = type==='loading' ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>${msg}`
+    : type==='success' ? `✅ ${msg}` : `❌ ${msg}`;
+  t.classList.add('show');
+  if(duration>0) toastTimer=setTimeout(()=>t.classList.remove('show'), duration);
+}
+
 // ── Google Sheets sync ──
 const SHEETS_URL='https://script.google.com/macros/s/AKfycbw4DGqDYdaWGkvTudSx-hKTnMM3PEX5pWPtLS3GChvIxyL-WFUwgeEY7Jr-uIYKhNQc/exec';
 
 async function atualizarStatusNaPlanilha(p){
+  showToast('Salvando na planilha…', 'loading', 0);
   try{
-    await fetch(SHEETS_URL,{
-      method:'POST',mode:'no-cors',
+    const resp = await fetch(SHEETS_URL,{
+      method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         _acao:'atualizar',
@@ -1205,6 +1231,7 @@ async function atualizarStatusNaPlanilha(p){
         valorSinal:p.valorSinal||0,
         sinalConhecido:p.sinalConhecido||false,
         historico:p.historico||[],
+        obsVendedor:p.obsVendedor||'',
         obsInterna:p.obsInterna||'',
         obsLogistica:p.obsLogistica||'',
         financeiroStatus:p.financeiroStatus||'nao-confirmado',
@@ -1223,10 +1250,20 @@ async function atualizarStatusNaPlanilha(p){
         pagamento:p.pagamento||'',
         valorMercadoria:p.valorMercadoria||0,
         modelo:p.modelo||'',
+        data:p.data||'',
         itens:p.itens||[]
       })
     });
-  }catch(e){console.warn('Erro ao sincronizar:',e);}
+    const result = await resp.json();
+    if(result.ok){
+      showToast('Salvo com sucesso!', 'success');
+    } else {
+      showToast('Erro ao salvar na planilha.', 'error');
+    }
+  }catch(e){
+    showToast('Erro de conexão. Verifique a internet.', 'error');
+    console.warn('Erro ao sincronizar:', e);
+  }
 }</script>
 </body>
 </html>
