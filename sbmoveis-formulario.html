@@ -249,7 +249,7 @@
       </div>
       <div class="field" id="f-dataPedido">
         <label>Data do Pedido <span class="req">*</span></label>
-        <input type="date" id="dataPedido"/>
+        <input type="text" id="dataPedido" placeholder="DD/MM/AAAA" maxlength="10" oninput="mascaraData(this)"/>
       </div>
     </div>
 
@@ -610,7 +610,12 @@ function toggleFreteRetirada(){
   calcTotal();
 }
 
-function toggleSemNumero(){
+function mascaraData(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>=3) v=v.substring(0,2)+'/'+v.substring(2);
+  if(v.length>=6) v=v.substring(0,5)+'/'+v.substring(5,9);
+  el.value=v;
+}
   const sn=document.getElementById('semNumero').checked;
   const nEl=document.getElementById('numero');
   if(sn){nEl.value='S/N';nEl.disabled=true;nEl.style.opacity='0.5';}
@@ -752,7 +757,7 @@ function finishStep1(){
     return;
   }
   S.vendedor=document.getElementById('vendedor').value.trim();
-  S.dataPedido=document.getElementById('dataPedido').value;
+  S.dataPedido=document.getElementById('dataPedido').value.trim();
   S.itens=itens;
   S.frete=parseFloat(document.getElementById('frete').value)||0;
   S.pagamento=document.getElementById('pagamento').value.trim();
@@ -869,7 +874,7 @@ function finishStep2(){
     modelo: itensStr,
     cor: itens.map(i=>i.cor).join(', '),
     quantidade: itens.reduce((s,i)=>s+i.qtd,0),
-    data: S.dataPedido ? new Date(S.dataPedido+'T12:00:00').toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR'),
+    data: S.dataPedido || new Date().toLocaleDateString('pt-BR'),
     frete: S.frete,
     valorMercadoria: subtotal,
     total: total,
@@ -1116,7 +1121,11 @@ async function salvarNaPlanilha(dados){
 
 // Init
 (function(){
-  document.getElementById('dataPedido').valueAsDate = new Date();
+  const hoje = new Date();
+  const dd = String(hoje.getDate()).padStart(2,'0');
+  const mm = String(hoje.getMonth()+1).padStart(2,'0');
+  const yyyy = hoje.getFullYear();
+  document.getElementById('dataPedido').value = `${dd}/${mm}/${yyyy}`;
   const params = new URLSearchParams(window.location.search);
   const codigo = params.get('c');
   const payload = params.get('p');
