@@ -1121,11 +1121,6 @@ async function salvarNaPlanilha(dados){
 
 // Init
 (function(){
-  const hoje = new Date();
-  const dd = String(hoje.getDate()).padStart(2,'0');
-  const mm = String(hoje.getMonth()+1).padStart(2,'0');
-  const yyyy = hoje.getFullYear();
-  document.getElementById('dataPedido').value = `${dd}/${mm}/${yyyy}`;
   const params = new URLSearchParams(window.location.search);
   const codigo = params.get('c');
   const payload = params.get('p');
